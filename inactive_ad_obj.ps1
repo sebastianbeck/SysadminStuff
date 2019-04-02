@@ -1,73 +1,70 @@
-#Script to get user and computer Accounts which didn't log on for 3 months or more. 
-#It also checks if the inactive user still has a home directory or RDS ProfileDisk.
-#Additionally it will check Check for Empty AD Groups.
-#It will output all the information in 3 different CSV Files on a network drive.
-
+#Script to get user and computer Accounts who didn't log on for 3 months and empty user groups,
+# Printers? not printed 3 months? .
+0
 #Author:  Beck Sebastian
 #Date:    2019.01.16
-#Version: v1.2
+#Version: v1.1
 
 #environment Informatioan
     #Run from a DC Windows Server 2012 R2 where the Active Directory Powershell Module is enabled
+    #Administrative Privileges needed
 
 #AD Module import
 Import-Module activedirectory
 
-#Variables
-#Sets the timeframe which will be searched
+#$Variables
 $90daysago = (Get-Date).AddDays(-90)
-#Defines the Searchbase for the Users 
-$SBUser = "OU=XXX,OU=YYYYYY,DC=DOMAIN,DC=COM"
-#Defines the Searchbase for the groups 
-$SBGroups = "OU=XXX,OU=YYYYYY,DC=DOMAIN,DC=COM"
-#This Variable defines where the output is stored 
-$path = "\\blablablabl\XXX\YYY\"
-#Path to homedirectories
-$homedir = "\\blablablabl\XXX\YYY\"
-#Path to RDSProfileDisks
-$profiledir = "\\blablablabl\XXX\YYY\"
-#Needed for the output
+$SBUser = "OU=Users,OU=a-group.li,DC=a-group,DC=li"
+$SBGroups = "OU=Groups,OU=a-group.li,DC=a-group,DC=li"
+$outputpath = "\\srv-daten-01\IT-Betrieb$\Wartung\ActiveDirectory\"
+$homedrive = "\\srv-daten-01\Homes$\"
+$upd= "\\SRV-DATEN-01\RDSprofileDiks$\UVHD-" # we work with User profile disks. you can also check for the normal Roaming Profiler
 $report = @()
 
 #Get Computers
-Get-ADComputer -Filter {LastLogonDate -le $90daysago} -Properties Name, LastLogonDate | ForEach-Object {
-        $report += New-Object psobject -Property @{Objekt=$_.Name;Date=$_.LastLogonDate}
+Get-ADComputer -Filter * -Properties * | ForEach-Object {
+    if($90daysago -ge $_.LastLogonDate)
+    {
+        $report += New-Object psobject -Property @{Objekt=$_.Name;Date=$_.LastLogonDate;Homedrive="";UPD=""}
+    }
 }
-    $report | Export-csv "$path$(Get-Date -f yyyy-MM-dd) Inactive Hosts.csv" -Delimiter ';'
-    $report = @()
 
-#Get Empty Groups
-Get-ADGroup -SearchBase $SBGroups -Filter * -Properties Members, CN | ForEach-Object {
+#Get Users
+Get-ADUser -SearchBase $SBUser -Filter * -Properties * | ForEach-Object {
+    if($90daysago -ge $_.LastLogonDate)
+    {
+        if((Test-Path "$homedrive$($_.SamAccountName)") -and (Test-Path "$upd$($_.SID).vhdx")) #check if both exist, if you want to check for roaming Profiles you need to alter the second test-path
+        {
+            $report += New-Object psobject -Property @{Objekt=$_.CanonicalName;Date=$_.LastLogonDate;Homedrive="$homedrive$($_.SamAccountName)";UPD="$upd$($_.SID)"}
+        }
+        elseif(Test-Path $homedrive$($_.SamAccountName)) #only homedrive
+        {
+        $report += New-Object psobject -Property @{Objekt=$_.CanonicalName;Date=$_.LastLogonDate;Homedrive="$homedrive$($_.SamAccountName)";UPD=""}
+        }
+        elseif(Test-Path $upd$($_.SID)) #only UPD, if you use roaming profile and want to check that you need to chnge SID to Username or whatever
+        {
+        $report += New-Object psobject -Property @{Objekt=$_.CanonicalName;Date=$_.LastLogonDate;Homedrive="$homedrive$($_.SamAccountName)";UPD=""}
+        }
+        else{ #nothing matches
+            $report += New-Object psobject -Property @{Objekt=$_.CanonicalName;Date=$_.LastLogonDate;Homedrive="";UPD=""}
+        }
+    }
+}
+#Get Groups
+Get-ADUser -SearchBase $SBGroups -Filter * -Properties * | ForEach-Object {
+    if($90daysago -ge $_.LastLogonDate)
+    {
+        $report += New-Object psobject -Property @{Objekt=$_.CanonicalName;Date=$_.LastLogonDate;Homedrive="";UPD=""}
+    }
+}
+    $report | Select-Object Date, Objekt, Homedrive, UPD | Export-csv "$outputpath$(Get-Date -f yyyy-MM-dd) Inactive Users and Groups.csv" -Delimiter ';'
+    
+    $report = @()
+#Empty Groups
+Get-ADGroup -SearchBase $SBGroups -Filter * -Properties * | ForEach-Object {
     if($_.Members.Count -eq 0)
     {
         $report += New-Object psobject -Property @{Gruppenname=$_.CN}
     }
 }
-    $report | Export-csv "$path$(Get-Date -f yyyy-MM-dd) Empty Groups.csv" -Delimiter ';'
-    $report = @()
-
-#Get Old Users, Profile Disks and Home Folders
-Get-ADUser -SearchBase $SBGroups -Filter {LastLogonDate -le $90daysago} -Properties SAMAccountName, CanonicalName, LastLogonDate | ForEach-Object {
-    #Create home directory path for each user
-    $homedirfull = $homedir + $_.SAMAccountName
-
-    #Create RemoteDesktopprofileDisks  path
-    $objUser = New-Object System.Security.Principal.NTAccount("a-group.li", $_.SAMAccountName)
-    $strSID = $objUser.Translate([System.Security.Principal.SecurityIdentifier])
-    $profiledirfull = $profiledir + "UVHD-" + $strSID.Value + ".vhdx"
-        
-    #Homedir test
-    if(Test-Path -Path $homedirfull)
-    { 
-        write-host $homedirfull
-        $report += New-Object psobject -Property @{Objekt=$_.SAMAccountName;Date=$_.LastLogonDate;Path=$homedirfull}
-    }
-    #Profile test
-    if(Test-Path -Path $profiledirfull)
-    { 
-        write-host $profiledirfull
-        $report += New-Object psobject -Property @{Objekt=$_.SAMAccountName;Date=$_.LastLogonDate;Path=$profiledirfull}
-    }
-}
-    $report | Export-csv "$path$(Get-Date -f yyyy-MM-dd) Old Users and Folders.csv" -Delimiter ';'
-    $report = @()
+    $report | Export-csv "$outputpath$(Get-Date -f yyyy-MM-dd) Empty Groups.csv" -Delimiter ';'
