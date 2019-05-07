@@ -34,7 +34,7 @@ param(
 	# Path to VHDX Files
     [parameter(Mandatory=$true)]	
     [string]
-	$vhdxdir = "C:\tools\bes\test123\",
+	$vhdxdir = ,
 
 	# Path to Log File, if Not set it will use the default 
     [parameter(Mandatory=$false)]	
