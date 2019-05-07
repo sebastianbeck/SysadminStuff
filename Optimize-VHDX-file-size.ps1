@@ -1,25 +1,22 @@
-﻿<#
+<#
 .SYNOPSIS
 Uses Hyper-V Manager Services & Hyper V-Modul for Powershell to optimize filesize of the .vhdx files and create a xlsx log. 
 In my case it is used for RDS Profiledisks. 
 
 TODO: 
 1. option without excel
-3. Description
-5. Check Resize Command see- Get VHD the minimal File sizei s way lower then the one with optimization
-8. Option with no log 
+2. Description
+3. Check Resize Command see- Get VHD the minimal File sizei s way lower then the one with optimization
+
 
 .DESCRIPTION
-This Script, 
-
-.Known Errors:
-The script does not work if "UVHD-" or "vhdx" is in the path to the VHDX files.
-For example: \\server1\files$\vhdx\.... Woud not work due to how the scipt splits the strings
+As it's a pretty small script the synopsis already explains it. With the comments in the script everything should be clear.
 
 Dependencies: 
 Tested from from a Windows 10 machine with Excel 2016
-You need excel installed to create the log file.
-To open the VHDX files you at least need to enable the "Hyper-V Module for Powershell" and "Hyper-V Services" 
+* Needs excel installed to create the log file.
+* Must run as administrator
+* To open the VHDX files you at least need to enable the "Hyper-V Module for Powershell" and "Hyper-V Services" 
 on the host where the script is started. You can do that like this (admin privileges are required):
 Open Windows-Features --> Select the Hyper-V Manager Services & Hyper V-Modul for Powershell and then click on OK
 
@@ -34,7 +31,7 @@ param(
 	# Path to VHDX Files
     [parameter(Mandatory=$true)]	
     [string]
-	$vhdxdir = ,
+	$vhdxdir,
 
 	# Path to Log File, if Not set it will use the default 
     [parameter(Mandatory=$false)]	
@@ -60,6 +57,19 @@ $ws.cells.item(1,7) = "Shrinked"
 
 $i=2 #needed for the loop
 $to=0 #used to calculate the total storage saved
+
+#Check if paths are written in the correct format and corrects them 
+if($vhdxdir -notmatch '.+?\\$')
+{
+$vhdxdir += '\'
+write-host $vhdxdir
+}
+if($outputdir -notmatch '.+?\\$')
+{
+$outputdir += '\'
+write-host $outputdir
+}
+
 Get-ChildItem $vhdxdir -File | ForEach-Object {
     $Fullvhdxdir = $vhdxdir + $_.Name #Creates Fullvhxdir 
     $vhdxname = $_.Name #ONly 
@@ -95,7 +105,7 @@ Get-ChildItem $vhdxdir -File | ForEach-Object {
 #Close Excel, save it and force the process to quit
 $ws.columns.item("A:G").EntireColumn.AutoFit() | out-null
 $excel.displayAlerts = $false
-$wb.SaveAs("$outputdir\$(Get-Date -UFormat %Y%m%d)VHDX-Optimization-Log.xlsx")
+$wb.SaveAs("$outputdir$(Get-Date -UFormat %Y%m%d)VHDX-Optimization-Log.xlsx")
 $wb.Close()
 $Excel.Quit()
 Stop-Process -ID $excelId
