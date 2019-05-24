@@ -14,11 +14,11 @@ Import-Module activedirectory
 
 #$Variables
 $90daysago = (Get-Date).AddDays(-90)
-$SBUser = "OU=Users,OU=a-group.li,DC=a-group,DC=li"
-$SBGroups = "OU=Groups,OU=a-group.li,DC=a-group,DC=li"
+$SBUser = "OU=XXXXX,OU=XXXXXXX,DC=XXXXXX,DC=XXXXX"
+$SBGroups = "OU=XXXXX,OU=XXXXXX,DC=XXXXXX,DC=XXXXX"
 $outputpath = "\\srv-daten-01\IT-Betrieb$\Wartung\ActiveDirectory\"
-$homedrive = "\\srv-daten-01\Homes$\"
-$upd= "\\SRV-DATEN-01\RDSprofileDiks$\UVHD-" # we work with User profile disks. you can also check for the normal Roaming Profiler
+$homedrive = "\\XXXXXX\XXXXXX$\"
+$upd= "\\XXXXXX\XXXXXX$\" # we work with User profile disks. you can also check for the normal Roaming Profiler
 $report = @()
 
 #Get Computers
