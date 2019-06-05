@@ -16,7 +16,7 @@ Import-Module activedirectory
 $90daysago = (Get-Date).AddDays(-90)
 $SBUser = "OU=XXXXX,OU=XXXXXXX,DC=XXXXXX,DC=XXXXX"
 $SBGroups = "OU=XXXXX,OU=XXXXXX,DC=XXXXXX,DC=XXXXX"
-$outputpath = "\\srv-daten-01\IT-Betrieb$\Wartung\ActiveDirectory\"
+$outputpath = "\\XXXXX\XXXX\XXX\XXXX\"
 $homedrive = "\\XXXXXX\XXXXXX$\"
 $upd= "\\XXXXXX\XXXXXX$\" # we work with User profile disks. you can also check for the normal Roaming Profiler
 $report = @()
