@@ -1,9 +1,8 @@
 <#
 .SYNOPSIS
 This Script creates a config file for the other posh-ssh automation scripts. The user input is done via Parameters.
-
 TODO: 
-
+-Check if Keyfile exists
 .DESCRIPTION:
 This script will create two subfolders (if they don't already exist) in the folder where it gets started. Therefore it needs write permissions.
 The Folder should look something like this:
@@ -17,15 +16,12 @@ The Folder should look something like this:
 |    |----key1
 After that it will create a config file in the configs folder. 
 It is possible to create multiple config files. The config can only be used with the windows user which created the config file due to the way the password is saved.
-
-
 .Dependencies: 
 none as of yet
-
 .PARAMETER Name
 Defines the name of the config file.
-.PARAMETER Computername
-Defines the computername oder ip address of the sftp server (default=22)
+.PARAMETER Server
+Defines the Server oder ip address of the sftp server (default=22)
 .PARAMETER Port
 Defines the Port on which the SFTP Server is listening.
 .PARAMETER Credentials
@@ -42,7 +38,7 @@ param(
 	$Name,
     [parameter(Mandatory=$true)]	
     [string]
-	$ComputerName,
+	$Server,
     [parameter(Mandatory=$false)]	
     [int]
 	$Port="22",
@@ -63,17 +59,12 @@ param(
     $errMsg = "This script must run in FullLanguage mode, but is running in " + $ExecutionContext.SessionState.LanguageMode.ToString()
     Write-Error $errMsg
     return
-}
-Make sure that Posh-SSH is installed
-if (!(Get-Module -Name Posh-SSH))
-{
-    $errMsg = "Module Posh-SSH is required. Install the Module with this command: Install-Module Posh-SSH"
-    Write-Error $errMsg
-    return
 }#>
 #Check if subfolder exist
 if (!(Test-Path("$($PSScriptRoot)\Configs"))) { mkdir "$($PSScriptRoot)\Configs" | Out-Null }
 if (!(Test-Path("$($PSScriptRoot)\Keys"))) { mkdir "$($PSScriptRoot)\Keys" | Out-Null }
+#Check if key File exists
+
 #Check if the Config File has already.xml endig, if not attach .xml at the end of the path
 if($name -like '*.xml')
 {
@@ -86,7 +77,7 @@ else
 #Create XML File and enter the settings. There are better ways to do this but it works
 New-Item $XML_Path -ItemType File
 Add-Content $XML_Path "<Configuration>"
-Add-Content $XML_Path "<ComputerName>$($ComputerName)</ComputerName>"
+Add-Content $XML_Path "<Server>$($Server)</Server>"
 Add-Content $XML_Path "<Port>$($Port)</Port>"
 Add-Content $XML_Path "<UserName>$($Credential.Username)</UserName>"
 Add-Content $XML_Path "<Password>$($Credential.Password | ConvertFrom-SecureString)</Password>"
