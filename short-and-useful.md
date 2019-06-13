@@ -7,4 +7,9 @@ ls *.* -recurse | get-filehash | group -property hash | where { $_.count -gt 1 }
 Export Users from AD to CSV File where EMailaddress is not empty (for Exmaple Getgophish campaign)
 ```powershell
 Get-ADUser -SearchBase "ou=Users,ou=blabla,dc=example,dc=com" -Filter {EmailAddress -like '*'} -Properties * | select GivenName, SurName, EmailAddress | export-csv -Path "" -Encoding Default
+
+```
+Export AD Computers with OS information
+```powershell
+Get-ADComputer -Filter * -Property * | Select-Object Name,OperatingSystem,OperatingSystemVersion | Export-CSV AllWindows.csv -NoTypeInformation -Encoding UTF8
 ```
