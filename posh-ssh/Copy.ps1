@@ -28,6 +28,8 @@ Defines the path to the Source Directory/File. Needs to be the full path
 Defines the path to the Destination Directory/File. Needs to be the full path
 .PARAMETER direction
 Defines if you want to upload or . It needs to be exactly "up" or "down" else it will fail
+.PARAMETER mode
+Defines if you copy or move 
 #>
 ####################################################################################################
 # Parameters
@@ -44,7 +46,10 @@ param(
 	$dst,
     [parameter(Mandatory=$false)]	
     [string]
-	$direction = "up"
+	$direction = "up",
+    [parameter(Mandatory=$false)]	
+    [string]
+	$mode = "copy"
 )
 ####################################################################################################
 # Initialize
@@ -87,8 +92,6 @@ if (!(Test-Path($XML_Path)))
 }
 #Read Config 
 
-#Check if Key file exists ?? I hope that normaly you should be able to use the script correct
-
 #Read Config File and Create Credential Object
 [xml]$XMLDoc= Get-Content $XML_Path
 $Server = $XmlDoc.Configuration.Server
@@ -96,18 +99,62 @@ $Port = $XMLDoc.Configuration.Port
 $Username = $XMLDoc.Configuration.Username
 $Password = $XMLDoc.Configuration.Password
 $KeyFile = $XMLDoc.COnfiguration.KeyFile
-
 $MyCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username, ($Password | ConvertTo-SecureString)
-
 $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port
 
+#Check if Keyfile still exists if the key file exists open connection with key file
+if ($KeyFile -And (Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)"))) 
+{ 
+    $KeyfilePath = "$($PSScriptRoot)\Keys\$($KeyFile)"
+    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port -KeyFile $KeyfilePath
+}
+#if a key is listed in the config but it doesn't exist anymore it will give the user the following error
+elseif($KeyFile -And !(Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)"))) 
+{
+    $errMsg = "Folder $($PSScriptRoot)\Key file which is in the config does't exist anymore. Please reover keyfile or create new configfile"
+    Write-Error $errMsg
+    return
+}
+#if no keyfile is defined then open the connection without keyfile
+else{
+    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port
+}
+
+#if the user wants to upload
 if($direction -eq "up")
 {
-   Set-SFTPFile -SessionId $Session -LocalFile $src -RemotePath $dst 
+    #to finish with sevi
+    if($mode -eq "move")
+    {
+        #to finish with sevi
+        Set-SFTPFile -SessionId $Session -LocalFile $src -RemotePath $dst 
+    }
+    elseif($mode -eq "up")
+    {
+           
+    }
+    else
+    {
+         #error message to be exrtreme
+    }
+
 }
+#if the users wants to download
 elseif($direction -eq "down")
 {
-
+    #to finish with SB 1. check if folder or file 2. what if folder exists already, what if some files exists, what to do with local files what to do --> get through all options 
+    if($mode -eq "move")
+    {
+        Set-SFTPFile -SessionId $Session -LocalFile $src -RemotePath $dst 
+    }
+    elseif($mode -eq "copy")
+    {
+           
+    }
+    else
+    {
+         #error message to be exrtreme
+    }
 }
 #Error 
 else
@@ -115,12 +162,5 @@ else
 
 }
 
-
-#Remove-SFTPSession $Sessio -Verbose
-
-
-#to download
-#Get-SFTPFile $Session -RemoteFile $dst -LocalPath $src -Overwrite 
-
-
-"C:\Users\sebas\Desktop\poshssh\asdf.txt"
+#close session
+Remove-SFTPSession $Sessio -Verbose
