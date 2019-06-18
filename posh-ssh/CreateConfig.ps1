@@ -27,7 +27,7 @@ Defines the Port on which the SFTP Server is listening.
 .PARAMETER Credentials
 Defines which Credentials should be used
 .PARAMETER KeyFile
-Defines the name of the keyfile, Please save the key file in the keys folder or else it will fail
+Defines the name of the keyfile, Please save the key file in the keys folder or else it will fail. IMPORTANT Use File Extension
 #>
 ####################################################################################################
 # Parameters
