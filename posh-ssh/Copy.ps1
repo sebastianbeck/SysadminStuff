@@ -46,7 +46,7 @@ param(
 	$dst,
     [parameter(Mandatory=$false)]	
     [string]
-	$direction = "up",
+	$direction = "down",
     [parameter(Mandatory=$false)]	
     [string]
 	$mode = "copy"
@@ -106,7 +106,7 @@ $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port
 if ($KeyFile -And (Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)"))) 
 { 
     $KeyfilePath = "$($PSScriptRoot)\Keys\$($KeyFile)"
-    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port -KeyFile $KeyfilePath
+    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port -KeyString $KeyfilePath
 }
 #if a key is listed in the config but it doesn't exist anymore it will give the user the following error
 elseif($KeyFile -And !(Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)"))) 
@@ -143,24 +143,29 @@ if($direction -eq "up")
 elseif($direction -eq "down")
 {
     #to finish with SB 1. check if folder or file 2. what if folder exists already, what if some files exists, what to do with local files what to do --> get through all options 
+    #immer überschreiben
     if($mode -eq "move")
     {
-        Set-SFTPFile -SessionId $Session -LocalFile $src -RemotePath $dst 
+        Get-SFTPChildItem -SessionId $Session -LocalFile $src -RemotePath $dst -Recursive
+        Remove-SFTPItem -SessionId $Session -Path $src -Force
     }
+    #immer überschreiben
     elseif($mode -eq "copy")
     {
-           
+        Get-SFTPChildItem -SessionId $Session -LocalFile $src -RemotePath $dst -Recursive
     }
     else
     {
-         #error message to be exrtreme
+        $errMsg = "The "
+        Write-Error $errMsg
+        return
     }
 }
 #Error 
 else
 {
-
+    
 }
 
 #close session
-Remove-SFTPSession $Sessio -Verbose
+Remove-SFTPSession $Session -Verbose
