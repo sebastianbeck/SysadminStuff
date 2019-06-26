@@ -1,15 +1,20 @@
 <#
 .SYNOPSIS
-This Script creates a config file for the other posh-ssh automation scripts. The user input is done via Parameters.
+This Script creates a config file for the other posh-ssh automation script. The user input is done via Parameters.
+.Examples
+Without Key 
+./Create-Config.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose
+With Keyfile
+./Create-Config.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose -KeyFile cert.pem
+Wiht KeyString
+./Create-Config.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose -KeyString cert.pem
 TODO: 
--Check if Keyfile exists
 .DESCRIPTION:
 This script will create two subfolders (if they don't already exist) in the folder where it gets started. Therefore it needs write permissions.
 The Folder should look something like this:
 /Path to Script
 |----CreateConfig.ps1
 |----Copy.ps1
-|----Move.ps1
 |----configs
 |    |----config1.xml
 |----keys
@@ -21,13 +26,15 @@ none as of yet
 .PARAMETER Name
 Defines the name of the config file.
 .PARAMETER Server
-Defines the Server oder ip address of the sftp server (default=22)
+Defines the server or ip address of the sftp server.
 .PARAMETER Port
-Defines the Port on which the SFTP Server is listening.
+Defines the Port on which the SFTP server is listening. The default is 22.
 .PARAMETER Credentials
-Defines which Credentials should be used
+Defines which Credentials should be used.
 .PARAMETER KeyFile
-Defines the name of the keyfile, Please save the key file in the keys folder or else it will fail. IMPORTANT Use File Extension
+Defines the name of the keyfile, Please save the key file in the keys folder or else it will fail. IMPORTANT Use File Extension!
+.PARAMETER KeyString
+Defines the KeyString which should be accepted.You need to enter the KeyString in the following format
 #>
 ####################################################################################################
 # Parameters
@@ -47,8 +54,12 @@ param(
     $Credential,
     [parameter(Mandatory=$false)]	
     [string]
-	$KeyFile  
+	$KeyFile,
+    [parameter(Mandatory=$false)]	
+    [string]
+	$KeyString  
 )
+
 ####################################################################################################
 # Initialize
 ####################################################################################################
@@ -82,4 +93,5 @@ Add-Content $XML_Path "<Port>$($Port)</Port>"
 Add-Content $XML_Path "<UserName>$($Credential.Username)</UserName>"
 Add-Content $XML_Path "<Password>$($Credential.Password | ConvertFrom-SecureString)</Password>"
 Add-Content $XML_Path "<KeyFile>$($KeyFile)</KeyFile>"
+Add-Content $XML_Path "<KeyString>$($KeyString)</KeyString>"
 Add-Content $XML_Path "</Configuration>"
