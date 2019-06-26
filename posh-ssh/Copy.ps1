@@ -1,25 +1,35 @@
 <#
 .SYNOPSIS
-This script uses the config created with "CreateConfig.ps1" and connects to the sftp server.
+This script uses the config created with "CreateConfig.ps1" and connects to the sftp server to do the requiered task.
 It will copy files or complete folders to the sftp server. The Source and Destination Folder are the parameters.
+.EXAMPLE
+./Copy.ps1 -Config config1.xml -src /folder1/folder2/ -dst "C:\Folder1\Folder2\" -direction down -mode move 
 TODO: 
-- Add possibilty to change copy direction.
+- Add possibilty to change copy direction & Finish upload
+- "Better Remove"
+
 .DESCRIPTION:
+This script checks if
+    - Posh SSH is installed
+    - the config and keys folder exist 
+    - the name parameter has .xml at the and and adds it if not 
+    - the config file exists
+Afterwards it reads the config file and checks if the name of the key file still exists in the keys folder.
+For each case (no key, keyfile and keystring )it opens the SSH Session and defines the commands which will be used later. 
+
+.Dependencies:
 You need to run the Create Config script first to run this script.
 The Folder should look something like this:
 /Path to Script
 |----CreateConfig.ps1
 |----Copy.ps1
-|----Move.ps1
 |----configs
 |    |----config1.xml
 |----keys
 |    |----key1
-
 After that it will create a config file in the configs folder. 
 It is possible to create multiple config files. The config can only be used with the windows user which created the config file due to the way the password is saved.
-.Dependencies: 
-none as of yet
+none as of yet, 
 .PARAMETER Config
 Defines the name of the config file to use
 .PARAMETER src
@@ -70,12 +80,12 @@ if (!(Test-Path("$($PSScriptRoot)\Configs")))
 }
 if (!(Test-Path("$($PSScriptRoot)\Keys"))) 
 { 
-    $errMsg = "Folder $($PSScriptRoot)\Keys not found. Please run CreateConfig.ps1 first."
+    $errMsg = "Folder $($PSScriptRoot)\Keys Folder not found. Please run CreateConfig.ps1 first."
     Write-Error $errMsg
     return
 }
 #Check if the Parameter Name has already.xml endig, if not attach .xml at the end of the path
-if($name -like '*.xml')
+if($Config -like '*.xml')
 {
     $XML_Path = "$($PSScriptRoot)\Configs\$($Config)"
 }
@@ -99,15 +109,20 @@ $Port = $XMLDoc.Configuration.Port
 $Username = $XMLDoc.Configuration.Username
 $Password = $XMLDoc.Configuration.Password
 $KeyFile = $XMLDoc.COnfiguration.KeyFile
+$KeyString = $XMLDoc.COnfiguration.KeyString
 $MyCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username, ($Password | ConvertTo-SecureString)
-$Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port
 
-#Check if Keyfile still exists if the key file exists open connection with key file
-if ($KeyFile -And (Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)"))) 
+#Check if Keyfile still exists if the key file exists open connection with key file SSH Session only needed for Move mode
+if ($KeyFile -And (Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)")) -And ($mode -eq "move")) 
 { 
     $KeyfilePath = "$($PSScriptRoot)\Keys\$($KeyFile)"
-    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port -KeyString $KeyfilePath
-}
+    #Create Commands for the later if section
+    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port -KeyFile $KeyfilePath
+    $Get = {Get-SCPFolder -ComputerName $Server -Credential $MyCredential -Port $Port -RemoteFolde $src -LocalFolder $dst -KeyFile $KeyfilePath}
+    $RemoveF = {Remove-SFTPItem -SessionId $Session.SessionID -Path $src -Force}
+    $RemoveS = {Remove-SFTPSession $Session.SessionID}
+    $New = {New-SFTPItem -SessionId $Session.SessionID -Path $src -ItemType Directory}
+} 
 #if a key is listed in the config but it doesn't exist anymore it will give the user the following error
 elseif($KeyFile -And !(Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)"))) 
 {
@@ -115,19 +130,37 @@ elseif($KeyFile -And !(Test-Path("$($PSScriptRoot)\Keys\$($KeyFile)")))
     Write-Error $errMsg
     return
 }
-#if no keyfile is defined then open the connection without keyfile
-else{
-    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port
+#if a keystring is defined 
+elseif($KeyString  -And ($mode -eq "move"))
+{
+    #Create Commands for the later if section
+    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port -KeyString $KeyString
+    $Get = {Get-SCPFolder -ComputerName $Server -Credential $MyCredential -Port $Port -RemoteFolde $src -LocalFolder $dst -KeyString $KeyString}
+    $RemoveF = {Remove-SFTPItem -SessionId $Session.SessionID -Path $src -Force}
+    $RemoveS = {Remove-SFTPSession $Session.SessionID}
+    $New = {New-SFTPItem -SessionId $Session.SessionID -Path $src -ItemType Directory}
 }
-
-#if the user wants to upload
+#if no keyfile is defined then open the connection without keyfile
+elseif(($mode -eq "move"))
+{
+    #Create Commands for the later if section
+    $Session = New-SFTPSession -ComputerName $Server -Credential $MyCredential -Port $Port
+    $Get = {Get-SCPFolder -ComputerName $Server -Credential $MyCredential -Port $Port -RemoteFolde $src -LocalFolder $dst}
+    $RemoveF = {Remove-SFTPItem -SessionId $Session.SessionID -Path $src -Force}
+    $RemoveS = {Remove-SFTPSession $Session.SessionID}
+    $New = {New-SFTPItem -SessionId $Session.SessionID -Path $src -ItemType Directory}
+}
+else
+{
+#mach nix im moment
+}
+#if the user wants to upload to do
 if($direction -eq "up")
 {
     #to finish with sevi
     if($mode -eq "move")
     {
-        #to finish with sevi
-        Set-SFTPFile -SessionId $Session -LocalFile $src -RemotePath $dst 
+    #to finish with sev
     }
     elseif($mode -eq "up")
     {
@@ -135,28 +168,28 @@ if($direction -eq "up")
     }
     else
     {
-         #error message to be exrtreme
+    #error message to be exrtreme
     }
 
 }
 #if the users wants to download
 elseif($direction -eq "down")
 {
-    #to finish with SB 1. check if folder or file 2. what if folder exists already, what if some files exists, what to do with local files what to do --> get through all options 
-    #immer überschreiben
     if($mode -eq "move")
     {
-        Get-SFTPChildItem -SessionId $Session -LocalFile $src -RemotePath $dst -Recursive
-        Remove-SFTPItem -SessionId $Session -Path $src -Force
+        #Download Content, Delete the folder and create it again
+        Invoke-Command -ScriptBlock $Get
+        Invoke-Command -ScriptBlock $RemoveF
+        Invoke-Command -ScriptBlock $New
+
     }
-    #immer überschreiben
     elseif($mode -eq "copy")
     {
-        Get-SFTPChildItem -SessionId $Session -LocalFile $src -RemotePath $dst -Recursive
+        Invoke-Command -ScriptBlock $Get
     }
     else
     {
-        $errMsg = "The "
+        $errMsg = "The mode must be copy or move"
         Write-Error $errMsg
         return
     }
@@ -164,8 +197,10 @@ elseif($direction -eq "down")
 #Error 
 else
 {
-    
+    $errMsg = "The direction has to be up or down"
+    Write-Error $errMsg
+    return
 }
-
+Invoke-Command -ScriptBlock $RemoveS
 #close session
-Remove-SFTPSession $Session -Verbose
+#Remove-SFTPSession $Session
