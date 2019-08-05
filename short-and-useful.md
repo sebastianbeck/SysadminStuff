@@ -13,3 +13,7 @@ Export AD Computers with OS information
 ```powershell
 Get-ADComputer -Filter * -Property * | Select-Object Name,OperatingSystem,OperatingSystemVersion | Export-CSV AllWindows.csv -NoTypeInformation -Encoding UTF8
 ```
+Export AD Username and PW Last changed
+```powershell
+Get-ADUser -Filter * -Property * | Select-Object Name,PasswordLastset | Export-CSV PWLastSet.csv -NoTypeInformation -Encoding UTF8
+```
