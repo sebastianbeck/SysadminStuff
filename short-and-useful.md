@@ -17,3 +17,7 @@ Export AD Username and PW Last changed
 ```powershell
 Get-ADUser -Filter * -Property * | Select-Object Name,PasswordLastset | Export-CSV PWLastSet.csv -NoTypeInformation -Encoding UTF8
 ```
+RoboCopy with permissions
+```
+ROBOCOPY "\\xxx\xxx$" "\\xxx\xxx$ /MIR /SEC /LOG:C:\temp\name.log
+```
