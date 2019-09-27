@@ -3,7 +3,7 @@
 This script uses the config created with "CreateConfig.ps1" and connects to the sftp server to do the requiered task.
 It will copy files or complete folders to the sftp server. The Source and Destination Folder are the parameters.
 .EXAMPLE
-./Copy.ps1 -Config config1.xml -src /folder1/folder2/ -dst "C:\Folder1\Folder2\" -direction down -mode move 
+./transfer.ps1 -Config config1.xml -src /folder1/folder2/ -dst "C:\Folder1\Folder2\" -direction down -mode move 
 .TODO: 
 - Add possibilty to change copy direction & Finish upload
 - "Better Remove"
