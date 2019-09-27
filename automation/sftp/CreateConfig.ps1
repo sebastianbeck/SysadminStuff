@@ -3,11 +3,11 @@
 This Script creates a config file for the other posh-ssh automation script. The user input is done via Parameters.
 .Examples
 Without Key 
-./Create-Config.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose
+./CreateConfig.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose
 With Keyfile
-./Create-Config.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose -KeyFile cert.pem
+./CreateConfig.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose -KeyFile cert.pem
 Wiht KeyString
-./Create-Config.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose -KeyString cert.pem
+./CreateConfig.ps1 -Name Config1.xml -Server example.com -Port 2222 -Credential Jose -KeyString cert.pem
 TODO: 
 .DESCRIPTION:
 This script will create two subfolders (if they don't already exist) in the folder where it gets started. Therefore it needs write permissions.
