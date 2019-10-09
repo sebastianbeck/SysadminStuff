@@ -193,7 +193,9 @@ Try{
     Add-content "$($PSScriptRoot)\$($config)_history.log" -value "Weekly Worldcheck Download worked at $(Get-Date)"
     }
 Catch{
-    
-    SendMail -mailcfg $mailcfg -recipient $recipient -status "failed"
+    if($mailcfg -and $recipient)
+    {
+        SendMail -mailcfg $mailcfg -recipient $recipient -status "failed"
+    }
     Add-content "$($PSScriptRoot)\$($config)_history.log" -value "Weekly Worldcheck Download failed at $(Get-Date)"
 }
