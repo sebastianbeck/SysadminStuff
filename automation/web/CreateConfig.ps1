@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-This Script creates a config file for https download. The user input is done via Parameters.
+This Script creates a config file for http/s download or mailconfig. The user input is done via Parameters.
 .Examples
 ./Create-Config.ps1 -Name Config1.xml -URL example.com -Port 2222 -Credential Jose
 TODO: 
@@ -33,7 +33,7 @@ param(
     [parameter(Mandatory=$true)]	
     [string]
 	$URL,
-    [parameter(Mandatory=$false)]	
+    [parameter(Mandatory=$true)]	
     [int]
 	$Port,
     [parameter(Mandatory=$true)]	
