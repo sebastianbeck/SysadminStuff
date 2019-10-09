@@ -46,7 +46,7 @@ If a zip or gzip is downloaded it will auto-extract it and delete the archive.
 .PARAMETER mailcfg
 Defines the name of the mailconfig file.
 .PARAMETER sendmail
-write the mail adress of the recipient in "" 
+write the mail address of the recipient in "" 
 .PARAMETER overwriteURL
 overwrites the url in the -config file if needed
 #>
@@ -193,7 +193,7 @@ Try{
     Add-content "$($PSScriptRoot)\$($config)_history.log" -value "Weekly Worldcheck Download worked at $(Get-Date)"
     }
 Catch{
-    #
+    
     SendMail -mailcfg $mailcfg -recipient $recipient -status "failed"
     Add-content "$($PSScriptRoot)\$($config)_history.log" -value "Weekly Worldcheck Download failed at $(Get-Date)"
 }
