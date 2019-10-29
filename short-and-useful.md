@@ -1,4 +1,4 @@
-# Useful short Powershell commands 
+# Useful short PowerShell commands 
 
 Delete duplicate files source: https://n3wjack.net/2015/04/06/find-and-delete-duplicate-files-with-just-powershell/
 ```powershell
