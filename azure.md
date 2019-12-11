@@ -28,5 +28,25 @@ az vm create \
     --admin-username azureuser \
     --admin-password <password>
 ```
-    
-    rg=learn-69aeefe3-1a51-4715-8ea7-6da97ba8a76a
+## Create NSG
+```
+az network nsg create \
+    --name MyNsg \
+    --resource-group $rg \
+    --location EastUS
+```  
+##Create NSG Rule 
+```
+az network nsg rule create \
+    --resource-group $rg \
+    --name MyNSGRule \
+    --nsg-name MyNsg \
+    --priority 4096 \
+    --source-address-prefixes 10.10.2.0/24 \
+    --source-port-ranges 80 443 3389 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 80 443 3389 \
+    --access Deny \
+    --protocol TCP \
+    --description "Deny from specific IP address ranges on 80, 443 and 3389."
+```
