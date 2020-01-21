@@ -1,3 +1,4 @@
+# Azure VM types
 <table>
 <thead>
 <tr>
