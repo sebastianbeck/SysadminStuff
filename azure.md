@@ -1,3 +1,45 @@
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Sizes</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>General purpose</td>
+<td>Dsv3, Dv3, DSv2, Dv2, DS, D, Av2, A0-7</td>
+<td>Balanced CPU-to-memory. Ideal for dev/test and small to medium applications and data solutions.</td>
+</tr>
+<tr>
+<td>Compute optimized</td>
+<td>Fs, F</td>
+<td>High CPU-to-memory. Good for medium-traffic applications, network appliances, and batch processes.</td>
+</tr>
+<tr>
+<td>Memory optimized</td>
+<td>Esv3, Ev3, M, GS, G, DSv2, DS, Dv2, D</td>
+<td>High memory-to-core. Great for relational databases, medium to large caches, and in-memory analytics.</td>
+</tr>
+<tr>
+<td>Storage optimized</td>
+<td>Ls</td>
+<td>High disk throughput and IO. Ideal for big data, SQL, and NoSQL databases.</td>
+</tr>
+<tr>
+<td>GPU optimized</td>
+<td>NV, NC</td>
+<td>Specialized VMs targeted for heavy graphic rendering and video editing.</td>
+</tr>
+<tr>
+<td>High performance</td>
+<td>H, A8-11</td>
+<td>Our most powerful CPU VMs with optional high-throughput network interfaces (RDMA).</td>
+</tr>
+</tbody>
+</table>
+
 ## Create VN
 ```
 az network vnet create \
