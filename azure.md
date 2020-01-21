@@ -1,3 +1,45 @@
+## Create VN
+```
+az network vnet create \
+    --resource-group $rg \
+    --name MyVNet1 \
+    --address-prefix 10.10.0.0/16 \
+    --subnet-name FrontendSubnet \
+    --subnet-prefix 10.10.1.0/24 \
+    --location West
+```
+    
+## Create Subnet
+```
+az network vnet subnet create \
+    --address-prefixes 10.10.2.0/24 \
+    --name BackendSubnet \
+    --resource-group $rg \
+    --vnet-name MyVNet1
+```
+## Create NSG
+```
+az network nsg create \
+    --name MyNsg \
+    --resource-group $rg \
+    --location EastUS
+```  
+## Create NSG Rule 
+```
+az network nsg rule create \
+    --resource-group $rg \
+    --name MyNSGRule \
+    --nsg-name MyNsg \
+    --priority 4096 \
+    --source-address-prefixes 10.10.2.0/24 \
+    --source-port-ranges 80 443 3389 \
+    --destination-address-prefixes '*' \
+    --destination-port-ranges 80 443 3389 \
+    --access Deny \
+    --protocol TCP \
+    --description "Deny from specific IP address ranges on 80, 443 and 3389."
+```
+# virtual machines
 # Azure VM types
 <table>
 <thead>
@@ -41,26 +83,7 @@
 </tbody>
 </table>
 
-## Create VN
-```
-az network vnet create \
-    --resource-group $rg \
-    --name MyVNet1 \
-    --address-prefix 10.10.0.0/16 \
-    --subnet-name FrontendSubnet \
-    --subnet-prefix 10.10.1.0/24 \
-    --location West
-```
-    
-## Create Subnet
-```
-az network vnet subnet create \
-    --address-prefixes 10.10.2.0/24 \
-    --name BackendSubnet \
-    --resource-group $rg \
-    --vnet-name MyVNet1
-```
-## Create Ubuntu Test Machne
+## Create Ubuntu vm
 ```
 az vm create \
     --resource-group $rg \
@@ -71,25 +94,40 @@ az vm create \
     --admin-username azureuser \
     --admin-password <password>
 ```
-## Create NSG
+## Check resize options for vms
 ```
-az network nsg create \
-    --name MyNsg \
-    --resource-group $rg \
-    --location EastUS
-```  
-##Create NSG Rule 
+az vm list-vm-resize-options \
+    --resource-group learn-3df9ecda-7332-4a28-b35e-0e1cad74fd68 \
+    --name SampleVM \
+    --output table
 ```
-az network nsg rule create \
-    --resource-group $rg \
-    --name MyNSGRule \
-    --nsg-name MyNsg \
-    --priority 4096 \
-    --source-address-prefixes 10.10.2.0/24 \
-    --source-port-ranges 80 443 3389 \
-    --destination-address-prefixes '*' \
-    --destination-port-ranges 80 443 3389 \
-    --access Deny \
-    --protocol TCP \
-    --description "Deny from specific IP address ranges on 80, 443 and 3389."
+## Resize vm
+```
+az vm resize \
+    --resource-group learn-3df9ecda-7332-4a28-b35e-0e1cad74fd68 \
+    --name SampleVM \
+    --size Standard_D2s_v3
+```
+## Show IP Addresses
+```
+az vm list-ip-addresses -n SampleVM -o table
+```
+## Get only value of a specific item
+```
+az vm show \
+    --resource-group learn-3df9ecda-7332-4a28-b35e-0e1cad74fd68 \
+    --name SampleVM \
+    --query "networkProfile.networkInterfaces[].id"
+
+az vm get-instance-view \
+    --name SampleVM \
+    --resource-group learn-3df9ecda-7332-4a28-b35e-0e1cad74fd68 \
+    --query "instanceView.statuses[?starts_with(code, 'PowerState/')].displayStatus" -o tsv
+```
+## Open Port
+```
+az vm open-port \
+    --port 80 \
+    --resource-group learn-3df9ecda-7332-4a28-b35e-0e1cad74fd68 \
+    --name SampleVM
 ```
