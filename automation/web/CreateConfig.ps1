@@ -1,10 +1,13 @@
 <#
+TODO
+
+DEPENDENCIES
+None as of yet.
 .SYNOPSIS
-This Script creates a config file for http/s download or mailconfig. The user input is done via Parameters.
-.Examples
-./Create-Config.ps1 -Name Config1.xml -URL example.com -Port 2222 -Credential Jose
-TODO: 
-.DESCRIPTION:
+This script creates a config file to connect to various servers, for example s/ftp, http/s or mailserver.
+.EXAMPLES
+./CreateConfig.ps1 -Name Config1.xml -URL example.com -Port 2222 -Credential Jose
+.DESCRIPTION
 This script create a config file in the folder where it gets started. Therefore it needs write permissions.
 The Folder should look something like this:
 /Path to Script
@@ -12,8 +15,6 @@ The Folder should look something like this:
 |----Copy.ps1
 |----config1.xml 
 It is possible to create multiple config files. The config can only be used with the windows user which created the config file due to the way the password is saved.
-.Dependencies: 
-none as of yet
 .PARAMETER Name
 Defines the name of the config file.
 .PARAMETER URL
@@ -41,18 +42,17 @@ param(
     $Credential
 )
 
-####################################################################################################
-# Initialize
-####################################################################################################
+#Initialize ############
 
-# Make sure this script is running in FullLanguage mode
-<#if ($ExecutionContext.SessionState.LanguageMode -ne [System.Management.Automation.PSLanguageMode]::FullLanguage)
+#Make sure this script is running in FullLanguage mode
+if ($ExecutionContext.SessionState.LanguageMode -ne [System.Management.Automation.PSLanguageMode]::FullLanguage)
 {
     $errMsg = "This script must run in FullLanguage mode, but is running in " + $ExecutionContext.SessionState.LanguageMode.ToString()
     Write-Error $errMsg
     return
-}#>
-#Check if the Config File has already.xml endig, if not attach .xml at the end of the path
+}
+
+#Check if the Config File has .xml endig, if not attach .xml at the end of the path
 if($name -like '*.xml')
 {
     $XML_Path = "$($PSScriptRoot)\$($Name)"
