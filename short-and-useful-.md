@@ -4,6 +4,11 @@ Delete duplicate files source: https://n3wjack.net/2015/04/06/find-and-delete-du
 ```powershell
 ls *.* -recurse | get-filehash | group -property hash | where { $_.count -gt 1 } | % { $_.group | select -skip 1 } | del
 ```
+RoboCopy with permissions
+```
+ROBOCOPY "\\xxx\xxx$" "\\xxx\xxx$ /MIR /SEC /LOG:C:\temp\name.log
+```
+## AD
 Export Users from a specific ad group 
 ```
 Get-ADGroupMember GroupName| get-aduser -properties GivenName, SurName, mail | Select GivenName, SurName, Mail | export-csv -Path "" -Encoding Default
@@ -25,7 +30,8 @@ Export AD Username and PW Last changed
 ```powershell
 Get-ADUser -Filter * -Property * | Select-Object Name,PasswordLastset | Export-CSV PWLastSet.csv -NoTypeInformation -Encoding UTF8
 ```
-RoboCopy with permissions
+## Exchange
+Message Tracking example
 ```
-ROBOCOPY "\\xxx\xxx$" "\\xxx\xxx$ /MIR /SEC /LOG:C:\temp\name.log
+Get-MessageTrackinglog -Start "05/15/2020 16:00:00" -End "05/19/2020 10:30:00" -Recipients "mail@mail.com" -Sender "mail@mail.com"
 ```
