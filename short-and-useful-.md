@@ -13,9 +13,9 @@ Export Users from a specific ad group
 ```
 Get-ADGroupMember GroupName| get-aduser -properties GivenName, SurName, mail | Select GivenName, SurName, Mail | export-csv -Path "" -Encoding Default
 ```
-Export Users from AD to CSV File where EMailaddress is not empty (for Exmaple Getgophish campaign)
+Export Users from AD to CSV File where EMailaddress is not empty (for example gophish campaign)
 ```powershell
-Get-ADUser -SearchBase "ou=Users,ou=blabla,dc=example,dc=com" -Filter {EmailAddress -like '*'} -Properties * | select GivenName, SurName, EmailAddress | export-csv -Path "" -Encoding Default
+Get-ADUser -SearchBase "ou=Users,ou=x,dc=x,dc=com" -Filter {EmailAddress -like '*'} -Properties * | select GivenName, SurName,EmailAddress | export-csv -Path "C:\temp\gg.csv" -Encoding "UTF8" -Delimiter ","
 
 ```
 Export AD Computers with OS information
