@@ -35,3 +35,7 @@ Message Tracking example
 ```
 Get-MessageTrackinglog -Start "05/15/2020 16:00:00" -End "05/19/2020 10:30:00" -Recipients "mail@mail.com" -Sender "mail@mail.com"
 ```
+Get Mailbox size for a certain domain including username, alias and size
+```
+Get-Mailbox | Where-Object {($_.PrimarySMTPAddress -like "*@domain.com")} | ForEach-Object{Get-MailboxStatistics -Identity $_.Alias} | Select-Object DisplayName, Alias, TotalItemSize | Export-CSV C:\temp\test.csv
+```
