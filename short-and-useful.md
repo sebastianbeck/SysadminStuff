@@ -8,6 +8,10 @@ RoboCopy with permissions
 ```
 ROBOCOPY "\\xxx\xxx$" "\\xxx\xxx$ /MIR /SEC /LOG:C:\temp\name.log
 ```
+Recreate top folder level on new location
+```
+Get-ChildItem -Path \\xxx\xData\Ablage\_Accurata-WIR -Directory | ForEach-Object {md "C:\temp\test\$($_.Name)"}
+```
 ## AD
 Export Users from a specific ad group 
 ```
