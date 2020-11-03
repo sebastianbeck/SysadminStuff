@@ -34,7 +34,7 @@ param(
 	#Defines the Source File
     [parameter(Mandatory=$false)]	
     [string]
-	$file = "C:\Users\bes\Desktop\AUDIT_2018_TAL_LISTE_ACCURATA_FINAL_20190822.xlsx"
+	$file = "C:\test\word.docx"
 )
 #copy file and rename it to ZIP , get some Variables needed later
 $file = Get-Item $file
