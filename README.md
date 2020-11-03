@@ -1,6 +1,6 @@
 # SysadminStuff
 In this repo I will collect commands, scripts and other stuff which I or someone else can hoepfully use someday.
-# Useful short PowerShell commands 
+## Useful short PowerShell commands 
 
 Delete duplicate files source: https://n3wjack.net/2015/04/06/find-and-delete-duplicate-files-with-just-powershell/
 ```powershell
@@ -14,7 +14,7 @@ Recreate top folder level on new location
 ```
 Get-ChildItem -Path \\xxx\xData\Ablage\_Accurata-WIR -Directory | ForEach-Object {md "C:\temp\test\$($_.Name)"}
 ```
-## AD
+### AD
 Export Users from a specific ad group 
 ```
 Get-ADGroupMember GroupName| get-aduser -properties GivenName, SurName, mail | Select GivenName, SurName, Mail | export-csv -Path "" -Encoding Default
@@ -36,7 +36,7 @@ Export AD Username and PW Last changed
 ```powershell
 Get-ADUser -Filter * -Property * | Select-Object Name,PasswordLastset | Export-CSV PWLastSet.csv -NoTypeInformation -Encoding UTF8
 ```
-## Exchange
+### Exchange
 Message Tracking example
 ```
 Get-MessageTrackinglog -Start "05/15/2020 16:00:00" -End "05/19/2020 10:30:00" -Recipients "mail@mail.com" -Sender "mail@mail.com"
