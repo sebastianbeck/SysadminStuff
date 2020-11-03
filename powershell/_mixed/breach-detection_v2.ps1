@@ -111,6 +111,6 @@ This log contains all breaches found for the e-mail addresses in your Microsoft 
     $head, $PreContent, [System.Web.HttpUtility]::HtmlDecode($BreachListHTML), $ShodanHTML | Out-File $Outputfile
     
 }
-Get-BreachInfo -EMailAddress "peter.gerner@hoval.com","beck_13@hotmail.de" -IPs "HOVAL.COM" -HaveIbeenPwnedKey "58d1878db8264188b15b8e7f1d2f3cee" -ShodanAPIKey "qFbjjTY6WHNH1w0FeKkR7UItJm6VBctq" -Outputfile "test.html"
+Get-BreachInfo -EMailAddress "xxx@xxx.com" -IPs "domain.COM" -HaveIbeenPwnedKey "" -ShodanAPIKey "xxxx" -Outputfile "test.html"
 
 
